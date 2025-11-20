@@ -1,90 +1,160 @@
-# ANN vs CNN for Image Classification
 
-## Project Overview
-This project explores **Artificial Neural Networks (ANNs)** and **Convolutional Neural Networks (CNNs)** for image classification tasks.  
-We first test both models on the **MNIST dataset (handwritten digits)** and then extend the comparison to the **Cats vs Dogs dataset**.  
 
-The goal is to understand:
-- The limitations of ANNs for image tasks.  
-- The strengths of CNNs in extracting spatial features.  
-- How regularization techniques and callbacks improve training.  
 
----
 
-## Datasets
-1. **MNIST (built-in Keras dataset)**  
-   - 60,000 training + 10,000 test images (28x28 grayscale digits).  
-   - Classification into 10 classes (digits 0–9).  
+# Smart Farming Advisor: Agentic RAG-Based System
 
-2. **Cats vs Dogs**  
-   - Downloaded dataset with two folders: `cats/` and `dogs/`.  
-   - Used **image_dataset_from_directory** to split into training (80%) and validation (20%).  
-   - Images resized to **150x150** pixels.  
+## **Project Overview**
+
+The Smart Farming Advisor is an AI-powered system that assists farmers in:
+
+* Recommending optimal crops based on soil and climate data.
+* Detecting plant diseases from leaf images.
+* Providing expert agricultural guidance via a Retrieval-Augmented Generation (RAG) knowledge base.
+* Acting intelligently to choose the appropriate tool for each query.
+
+This project integrates **Machine Learning (ML)**, **Deep Learning (DL)**, and **RAG pipelines** under a single agentic framework for practical farming decision support.
 
 ---
 
-## Models
+## **Folder Structure**
 
-### ANN (Fully Connected Network)
-- Input flattened into 1D vector.  
-- Dense(512) → Dropout(0.2)  
-- Dense(256) → Dropout(0.2)  
-- Output Layer (Softmax for MNIST, Sigmoid for Cats vs Dogs).  
-
-### CNN (Convolutional Neural Network)
-- Conv2D(32) → Conv2D(64) → MaxPooling → Dropout  
-- Conv2D(128) → MaxPooling  
-- Flatten → Dense(256) → Dropout → Output Layer.  
-
-### Training Setup
-- Optimizer: **Adam**  
-- Loss: **SparseCategoricalCrossentropy** (MNIST), **BinaryCrossentropy** (Cats vs Dogs).  
-- Callbacks:  
-  - **EarlyStopping** → Stops training when validation loss doesn’t improve.  
-  - **ModelCheckpoint** → Saves best model.  
-
----
-
-## Results
-
-### MNIST
-| Model | Validation Accuracy | Validation Loss |
-|-------|---------------------|-----------------|
-| ANN   | ~98.2%              | ~0.06           |
-| CNN   | ~99.1%              | ~0.027          |
-
-CNN outperforms ANN, capturing spatial relationships in images.  
-<img width="868" height="332" alt="image" src="https://github.com/user-attachments/assets/4e384051-3e8c-47bc-89e4-1b74a094f8dc" />
-
-<img width="462" height="383" alt="image" src="https://github.com/user-attachments/assets/b3414bd3-6917-4781-90b0-af977693da4f" />
+```
+smart_farming_agent/
+│
+├── data/
+│   ├── crop_data.csv             # Crop recommendation dataset
+│   ├── plant_images/             # PlantVillage subset images
+│   └── faq_data.csv              # Farmer FAQ / knowledge base
+│
+├── models/
+│   ├── crop_model.pkl            # Trained ML model
+│   └── disease_model.h5          # Trained DL model
+│
+├── tools/
+│   ├── __init__.py
+│   ├── crop_predictor.py         # ML crop predictor tool
+│   ├── disease_detector.py       # DL disease detection tool
+│   └── rag_qa.py                 # RAG + LLM tool
+│
+├── agent/
+│   ├── __init__.py
+│   └── agent_pipeline.py         # Agentic pipeline integration
+│
+├── build_faiss_index.py          # Script to create FAISS vector index
+├── main.py                       # Single entry point
+├── requirements.txt              # Python dependencies
+└── README.md
+```
 
 ---
 
-### Cats vs Dogs
-| Model | Validation Accuracy | Validation Loss |
-|-------|---------------------|-----------------|
-| ANN   | ~99% (overfits fast) | 0.05            |
-| CNN   | ~100% (too perfect)  | 1e-07           |
+## **Setup Instructions**
 
-The CNN results suggest **possible data leakage or small validation set**.  
+### **1. Clone the Repository**
 
+```bash
+git clone https://github.com/YourUsername/smart_farming_agent.git
+cd smart_farming_agent
+```
+
+### **2. Create a Virtual Environment (Recommended)**
+
+```bash
+python -m venv venv
+# Activate
+source venv/bin/activate       # Linux/Mac
+venv\Scripts\activate          # Windows
+```
+
+### **3. Install Dependencies**
+
+```bash
+pip install -r requirements.txt
+```
+
+### **4. Prepare Data**
+
+* Place crop dataset as `data/crop_data.csv`.
+* Place leaf images for disease detection in `data/plant_images/`.
+* Place FAQ knowledge base as `data/faq_data.csv`.
+
+### **5. Train or Load Models**
+
+* **Crop Predictor:** Train on your crop dataset or place pre-trained model in `models/crop_model.pkl`.
+* **Disease Detector:** Train a CNN/ResNet50 model on `plant_images/` and save as `models/disease_model.h5`.
+
+### **6. Build FAISS Index**
+
+> Run this step **once** to create the semantic search index for RAG.
+
+```bash
+python build_faiss_index.py
+```
+
+* This creates a `faiss_index/` folder used by the RAG QA tool.
 
 ---
 
-##  Conceptual Insights
-- **Why CNN > ANN for Images?**  
-  CNNs exploit local spatial structure via convolution filters → fewer parameters, better generalization.  
-- **Pooling Layers:** Reduce spatial size, lower computation, and make model invariant to small shifts.  
-- **Max vs Avg Pooling:** Max pooling captures dominant features; average pooling smooths features.  
+## **Usage**
+
+1. Run the main agent:
+
+```bash
+python main.py
+```
+
+2. Enter queries in the terminal:
+
+* **Crop Recommendation Example:**
+
+```
+Which crop should I plant with N=90, P=42, K=43?
+```
+
+* **Disease Detection Example:**
+
+```
+My tomato leaf has spots. Detect the disease. 
+```
+
+* **RAG QA Example:**
+
+```
+How can I improve soil fertility for wheat?
+```
+
+3. The agent will:
+
+   * Parse your query.
+   * Choose the appropriate tool.
+   * Return a prediction, disease label, or expert answer.
+
+4. To exit, type:
+
+```
+exit
+```
 
 ---
 
-## Visuals
-- Training accuracy & loss curves for both models.  
-- Confusion matrix for MNIST.  
-- Sample predictions for Cats vs Dogs.  
+## **Evaluation**
+
+* Crop Predictor: Accuracy, Precision, Recall, F1-score.
+* Disease Detector: Accuracy, loss, inference time.
+* RAG QA: Relevance, BLEU, Hit Rate.
+* Agent: Tool routing correctness.
+
+---
+
+## **Future Improvements**
+
+* Automatic parsing of numeric soil/weather inputs from free-text queries.
+* Expand disease detection to more crops and multi-class diseases.
+* GUI integration (web or mobile) for farmer-friendly access.
+* Weather forecast-based predictive crop recommendations.
 
 ---
 
 
- 
+
